@@ -262,11 +262,11 @@ def main():
 
     #Clip to a shape file
     clip_to_shp = None
-    if hasattr(X, 'clip_to_shp'):
-        clip_to_shp = X.clip_to_shp
-
-        if not os.path.exists(clip_to_shp):
-            raise Exception(f'Clipping shape file is not valid. Path given was\n {clip_to_shp}')
+    # if hasattr(X, 'clip_to_shp'):
+    #     clip_to_shp = X.clip_to_shp
+    #
+    #     if not os.path.exists(clip_to_shp):
+    #         raise Exception(f'Clipping shape file is not valid. Path given was\n {clip_to_shp}')
 
     if clip_to_shp and extent:
         raise Exception('Cannot specify both extent and a shape file to clip to')
