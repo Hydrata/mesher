@@ -1,1 +1,2 @@
 scikit-build==0.15.0
+conan==1.49.0
