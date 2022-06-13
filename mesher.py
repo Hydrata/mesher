@@ -147,8 +147,8 @@ def main(configfile):
     # if a mesh was already generated, and only applying a new parametrization is required,
     # enabling this skips the mesh generation step
     reuse_mesh = False
-    if hasattr(X, 'reuse_mesh'):
-        reuse_mesh = X.reuse_mesh
+    # if hasattr(X, 'reuse_mesh'):
+    #     reuse_mesh = X.reuse_mesh
 
     mesher_path = os.path.dirname(os.path.abspath(__file__)) + '/mesher'
 
@@ -328,9 +328,9 @@ def main(configfile):
     base_name = 'mesher'
 
     base_dir = user_output_dir + base_name + os.path.sep
-
-    if not os.path.isdir(base_dir) and reuse_mesh:
-        raise Exception(f"Using reuse_mesh=True, however the directory {base_dir} does not exist")
+    reuse_mesh = False
+    # if not os.path.isdir(base_dir) and reuse_mesh:
+    #     raise Exception(f"Using reuse_mesh=True, however the directory {base_dir} does not exist")
 
     # Delete previous dir (if exists)
     if os.path.isdir(base_dir) and not reuse_mesh:
@@ -392,8 +392,8 @@ def main(configfile):
         src_ds = None
 
     cutline_cmd = ''
-    if clip_to_shp:
-        cutline_cmd = f' -cutline {clip_to_shp} -crop_to_cutline '
+    # if clip_to_shp:
+    #     cutline_cmd = f' -cutline {clip_to_shp} -crop_to_cutline '
 
     e = 'GDAL_CACHEMAX=\"5%%\" %sgdalwarp %s %s -ot Float32 -multi -overwrite -dstnodata -9999 %s -t_srs \"%s\"' + ext_str
     subprocess.check_call([e % (gdal_prefix,
