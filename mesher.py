@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Mesher
 # Copyright (C) 2017 Christopher Marsh
 
@@ -51,16 +50,18 @@ MESH_MAJOR = "1"
 MESH_MINOR = "0"
 MESH_PATCH = "0"
 
-def main():
+
+def main(configfile):
     # load user configurable parameters here
     # Check user defined configuration file
 
-    if len(sys.argv) == 1:
-        print('ERROR: mesher.py requires one argument [configuration file] (i.e. mesher.py Bow.py)')
-        return
+    if not configfile:
+        if len(sys.argv) == 1:
+            print('ERROR: mesher.py requires one argument [configuration file] (i.e. mesher.py Bow.py)')
+            return
 
-    # Get name of configuration file/module
-    configfile = sys.argv[-1]
+        # Get name of configuration file/module
+        configfile = sys.argv[-1]
 
     # Load in configuration file as module
     X = importlib.machinery.SourceFileLoader('config', configfile)
@@ -324,8 +325,7 @@ def main():
     except:
         raise BaseException(""" ERROR: Could not find gdal-config, please ensure it is installed and on $PATH """)
 
-    base_name = os.path.basename(dem_filename)
-    base_name = os.path.splitext(base_name)[0]
+    base_name = 'mesher'
 
     base_dir = user_output_dir + base_name + os.path.sep
 
@@ -341,7 +341,12 @@ def main():
     # these have to be separate ifs for the logic to work correctly
     if not reuse_mesh:
         # make new output dir
-        os.makedirs(base_dir)
+        try:
+            shutil.rmtree(base_dir)
+        except OSError:
+            pass
+        if not os.path.exists(base_dir):
+            os.makedirs(base_dir)
 
     # we want to reuse an already generated mesh, but we will need to clean up the shp file as gdal won't overwrite
     # an existing one
