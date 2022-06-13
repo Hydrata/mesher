@@ -24,10 +24,10 @@ from functools import partial
 import sys
 import shutil
 import importlib
-import vtk
+# import vtk
 import warnings
 import uuid
-import cloudpickle
+# import cloudpickle
 from concurrent import futures
 import time
 
@@ -958,7 +958,7 @@ def main(configfile):
 
     if output_write_vtu:
         print('Writing vtu file...')
-        write_vtu(base_dir + base_name + '.vtu', mesh, params, ics)
+        # write_vtu(base_dir + base_name + '.vtu', mesh, params, ics)
 
     if output_write_shp:
         print('Writing shp file...')
@@ -1071,6 +1071,7 @@ def do_parameterize(gt, is_geographic, mesh, parameter_files, initial_conditions
             output.append(rasterize_elem(f, mem_layer, m, srs_out, new_gt, src_offset))
 
         if 'classifier' in data:
+            import cloudpickle
             fn = cloudpickle.loads(data['classifier'])
             output = fn(*output)
         else:
@@ -1093,6 +1094,7 @@ def do_parameterize(gt, is_geographic, mesh, parameter_files, initial_conditions
             output.append(rasterize_elem(f, mem_layer, m, srs_out, new_gt, src_offset))
 
         if 'classifier' in data:
+            import cloudpickle
             output = cloudpickle.loads(data['classifier'])(*output)
         else:
             output = output[0]  # flatten the list for the append below
@@ -1121,6 +1123,7 @@ def regularize_inputs(base_dir, exec_str, gdal_prefix, input_files, pixel_height
             total_weights += data['weight']
             use_weights = True
         if 'classifier' in data:
+            import cloudpickle
             input_files[key]['classifier'] = cloudpickle.dumps(input_files[key]['classifier'])
 
         param_args.append((base_dir, data, exec_str, gdal_prefix, key, pixel_height,
@@ -1479,97 +1482,98 @@ def write_shp(fname, mesh, parameter_files, initial_conditions):
     output_usm = None  # close file
 
 
-def write_vtu(fname, mesh, parameter_files, initial_conditions):
-    vtu = vtk.vtkUnstructuredGrid()
-
-    output_vtk = fname
-    vtuwriter = vtk.vtkXMLUnstructuredGridWriter()
-    vtuwriter.SetFileName(output_vtk)
-
-    # check what version of vtk we are using so we can avoid the api conflict
-    # http://www.vtk.org/Wiki/VTK/VTK_6_Migration/Replacement_of_SetInput#Replacement_of_SetInput.28.29_with_SetInputData.28.29_and_SetInputConnection.28.29
-    if vtk.vtkVersion.GetVTKMajorVersion() > 5:
-        vtuwriter.SetInputData(vtu)
-    else:
-        vtuwriter.SetInput(vtu)
-
-    vtu_points = vtk.vtkPoints()
-    vtu_triangles = vtk.vtkCellArray()
-
-    vtu_points.SetNumberOfPoints(len(mesh['mesh']['vertex']))
-
-    vtu_cells = {'elevation': vtk.vtkFloatArray(),
-                 'cellid': vtk.vtkFloatArray(),
-                 'area': vtk.vtkFloatArray()
-                 }
-    vtu_cells['elevation'].SetName('elevation')
-    vtu_cells['area'].SetName('area')
-    vtu_cells['cellid'].SetName('cellid')
-
-    for key, data in parameter_files.items():
-        k = '[param] ' + key
-        vtu_cells[k] = vtk.vtkFloatArray()
-        vtu_cells[k].SetName(k)
-
-    for key, data in initial_conditions.items():
-        k = '[ic] ' + key
-        vtu_cells[k] = vtk.vtkFloatArray()
-        vtu_cells[k].SetName(k)
-
-    for elem in range(mesh['mesh']['nelem']):
-        v0 = mesh['mesh']['elem'][elem][0]
-        v1 = mesh['mesh']['elem'][elem][1]
-        v2 = mesh['mesh']['elem'][elem][2]
-
-        vtu_points.SetPoint(v0, mesh['mesh']['vertex'][v0][0],
-                            mesh['mesh']['vertex'][v0][1],
-                            mesh['mesh']['vertex'][v0][2])
-
-        vtu_points.SetPoint(v1, mesh['mesh']['vertex'][v1][0],
-                            mesh['mesh']['vertex'][v1][1],
-                            mesh['mesh']['vertex'][v1][2])
-
-        vtu_points.SetPoint(v2, mesh['mesh']['vertex'][v2][0],
-                            mesh['mesh']['vertex'][v2][1],
-                            mesh['mesh']['vertex'][v2][2])
-
-        triangle = vtk.vtkTriangle()
-        triangle.GetPointIds().SetId(0, v0)
-        triangle.GetPointIds().SetId(1, v1)
-        triangle.GetPointIds().SetId(2, v2)
-
-        vtu_triangles.InsertNextCell(triangle)
-        vtu_cells['elevation'].InsertNextTuple1((mesh['mesh']['vertex'][v0][2] +
-                                                 mesh['mesh']['vertex'][v1][2] +
-                                                 mesh['mesh']['vertex'][v2][2]) / 3.)
-
-        vtu_cells['cellid'].InsertNextTuple1(elem)
-
-        area = 1
-        vtu_cells['area'].InsertNextTuple1(area)
-
-        for key, data in parameter_files.items():
-            output = data[elem]
-            vtu_cells['[param] ' + key].InsertNextTuple1(output)
-
-        for key, data in initial_conditions.items():
-            output = data[elem]
-            vtu_cells['[ic] ' + key].InsertNextTuple1(output)
-
-    vtu.SetPoints(vtu_points)
-    vtu.SetCells(vtk.VTK_TRIANGLE, vtu_triangles)
-    for p in vtu_cells.values():
-        vtu.GetCellData().AddArray(p)
-
-    vtk_proj4 = vtk.vtkStringArray()
-    vtk_proj4.SetNumberOfComponents(1)
-    vtk_proj4.SetName("proj4")
-    vtk_proj4.InsertNextValue(mesh['mesh']['proj4'])
-
-    vtu.GetFieldData().AddArray(vtk_proj4)
-
-    vtuwriter.Write()
+# def write_vtu(fname, mesh, parameter_files, initial_conditions):
+#     vtu = vtk.vtkUnstructuredGrid()
+#
+#     output_vtk = fname
+#     vtuwriter = vtk.vtkXMLUnstructuredGridWriter()
+#     vtuwriter.SetFileName(output_vtk)
+#
+#     # check what version of vtk we are using so we can avoid the api conflict
+#     # http://www.vtk.org/Wiki/VTK/VTK_6_Migration/Replacement_of_SetInput#Replacement_of_SetInput.28.29_with_SetInputData.28.29_and_SetInputConnection.28.29
+#     if vtk.vtkVersion.GetVTKMajorVersion() > 5:
+#         vtuwriter.SetInputData(vtu)
+#     else:
+#         vtuwriter.SetInput(vtu)
+#
+#     vtu_points = vtk.vtkPoints()
+#     vtu_triangles = vtk.vtkCellArray()
+#
+#     vtu_points.SetNumberOfPoints(len(mesh['mesh']['vertex']))
+#
+#     vtu_cells = {'elevation': vtk.vtkFloatArray(),
+#                  'cellid': vtk.vtkFloatArray(),
+#                  'area': vtk.vtkFloatArray()
+#                  }
+#     vtu_cells['elevation'].SetName('elevation')
+#     vtu_cells['area'].SetName('area')
+#     vtu_cells['cellid'].SetName('cellid')
+#
+#     for key, data in parameter_files.items():
+#         k = '[param] ' + key
+#         vtu_cells[k] = vtk.vtkFloatArray()
+#         vtu_cells[k].SetName(k)
+#
+#     for key, data in initial_conditions.items():
+#         k = '[ic] ' + key
+#         vtu_cells[k] = vtk.vtkFloatArray()
+#         vtu_cells[k].SetName(k)
+#
+#     for elem in range(mesh['mesh']['nelem']):
+#         v0 = mesh['mesh']['elem'][elem][0]
+#         v1 = mesh['mesh']['elem'][elem][1]
+#         v2 = mesh['mesh']['elem'][elem][2]
+#
+#         vtu_points.SetPoint(v0, mesh['mesh']['vertex'][v0][0],
+#                             mesh['mesh']['vertex'][v0][1],
+#                             mesh['mesh']['vertex'][v0][2])
+#
+#         vtu_points.SetPoint(v1, mesh['mesh']['vertex'][v1][0],
+#                             mesh['mesh']['vertex'][v1][1],
+#                             mesh['mesh']['vertex'][v1][2])
+#
+#         vtu_points.SetPoint(v2, mesh['mesh']['vertex'][v2][0],
+#                             mesh['mesh']['vertex'][v2][1],
+#                             mesh['mesh']['vertex'][v2][2])
+#
+#         triangle = vtk.vtkTriangle()
+#         triangle.GetPointIds().SetId(0, v0)
+#         triangle.GetPointIds().SetId(1, v1)
+#         triangle.GetPointIds().SetId(2, v2)
+#
+#         vtu_triangles.InsertNextCell(triangle)
+#         vtu_cells['elevation'].InsertNextTuple1((mesh['mesh']['vertex'][v0][2] +
+#                                                  mesh['mesh']['vertex'][v1][2] +
+#                                                  mesh['mesh']['vertex'][v2][2]) / 3.)
+#
+#         vtu_cells['cellid'].InsertNextTuple1(elem)
+#
+#         area = 1
+#         vtu_cells['area'].InsertNextTuple1(area)
+#
+#         for key, data in parameter_files.items():
+#             output = data[elem]
+#             vtu_cells['[param] ' + key].InsertNextTuple1(output)
+#
+#         for key, data in initial_conditions.items():
+#             output = data[elem]
+#             vtu_cells['[ic] ' + key].InsertNextTuple1(output)
+#
+#     vtu.SetPoints(vtu_points)
+#     vtu.SetCells(vtk.VTK_TRIANGLE, vtu_triangles)
+#     for p in vtu_cells.values():
+#         vtu.GetCellData().AddArray(p)
+#
+#     vtk_proj4 = vtk.vtkStringArray()
+#     vtk_proj4.SetNumberOfComponents(1)
+#     vtk_proj4.SetName("proj4")
+#     vtk_proj4.InsertNextValue(mesh['mesh']['proj4'])
+#
+#     vtu.GetFieldData().AddArray(vtk_proj4)
+#
+#     vtuwriter.Write()
 
 
 if __name__ == "__main__":
-    main()
+    config_file = None
+    main(config_file)
